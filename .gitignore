@@ -1,0 +1,40 @@
+# ==========================================
+# ICRS UNIFIED GITIGNORE
+# ==========================================
+
+# IDEs and System
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.settings/
+.classpath
+.project
+
+# Python (ai-backend)
+**/venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache/
+**/complaints.db-journal
+
+# React (icrs-frontend)
+**/node_modules/
+**/dist/
+**/build/
+**.env.local
+**.env.development.local
+**.env.test.local
+**.env.production.local
+
+# Spring Boot (icrs-backend)
+**/target/
+**/bin/
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear

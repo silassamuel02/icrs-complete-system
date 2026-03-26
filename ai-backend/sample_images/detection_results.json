@@ -1,0 +1,17 @@
+{
+  "violence": {
+    "urgency_detected": true,
+    "categories_found": [
+      "violence",
+      "fire"
+    ],
+    "severity": "HIGH"
+  },
+  "disaster": {
+    "urgency_detected": true,
+    "categories_found": [
+      "disaster"
+    ],
+    "severity": "HIGH"
+  }
+}

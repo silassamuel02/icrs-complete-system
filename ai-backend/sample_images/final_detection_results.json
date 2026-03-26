@@ -1,0 +1,36 @@
+{
+  "disaster": {
+    "urgency_detected": true,
+    "categories_found": [
+      "explosion"
+    ],
+    "severity": "HIGH"
+  },
+  "explosion": {
+    "urgency_detected": true,
+    "categories_found": [
+      "explosion"
+    ],
+    "severity": "MEDIUM"
+  },
+  "medical": {
+    "urgency_detected": true,
+    "categories_found": [
+      "medical"
+    ],
+    "severity": "HIGH"
+  },
+  "safe": {
+    "urgency_detected": false,
+    "categories_found": [],
+    "severity": "LOW"
+  },
+  "violence": {
+    "urgency_detected": true,
+    "categories_found": [
+      "fire",
+      "violence"
+    ],
+    "severity": "HIGH"
+  }
+}

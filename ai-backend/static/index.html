@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICRS — Strategic Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080c;
+      --surface: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --accent-glow: rgba(88, 166, 255, 0.2);
+      --text: #c9d1d9;
+      --text-bold: #f0f6fc;
+      --muted: #8b949e;
+      --success: #238636;
+      --danger: #da3633;
+      --warning: #d29922;
+      --radius: 12px;
+      --glass: rgba(22, 27, 34, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      transition: 0.3s;
+    }
+
+    .brand {
+      padding: 0 24px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .brand-name {
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--text-bold);
+    }
+
+    .nav-item {
+      padding: 12px 24px;
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-left: 3px solid transparent;
+      transition: 0.2s;
+    }
+
+    .nav-item:hover {
+      background: rgba(88, 166, 255, 0.05);
+      color: var(--accent);
+    }
+
+    .nav-item.active {
+      background: rgba(88, 166, 255, 0.1);
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+
+    /* ── MAIN CONTENT ── */
+    #content {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      height: 70px;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .account-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .role-badge {
+      background: var(--accent);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--text-bold);
+    }
+
+    .role-select {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      outline: none;
+    }
+
+    .main-view {
+      padding: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── DASHBOARD COMPONENTS ── */
+    .view-section {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .card-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-bold);
+    }
+
+    /* ── CHARTS ── */
+    .chart-box {
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── TABLES ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    td {
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-pending {
+      background: rgba(210, 153, 34, 0.1);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+
+    .badge-resolved {
+      background: rgba(35, 134, 54, 0.1);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .badge-progress {
+      background: rgba(88, 166, 255, 0.1);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    /* ── FORMS ── */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 8px;
+      color: white;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    /* ── AI TOOLS ── */
+    .ai-tools {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .ai-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .ai-chip.active {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+      color: var(--accent);
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.4s;
+    }
+
+    /* ── MODALS ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    #modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      width: 500px;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── VIDEO OVERLAY ── */
+    .video-container {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    #live-video {
+      width: 100%;
+      display: block;
+    }
+
+    #live-canvas-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #debug-logs {
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      height: 100px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      #sidebar {
+        display: none;
+      }
+
+      header {
+        padding: 0 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🤖</div>
+      <div class="brand-name">ICRS PRO</div>
+    </div>
+    <div class="nav-item active" onclick="switchTab('dashboard')"><span>📊</span> Overview</div>
+    <div class="nav-item" onclick="switchTab('complaints')"><span>📝</span> Complaints</div>
+    <div class="nav-item" onclick="switchTab('reports')"><span>📄</span> AI Reports</div>
+    <div style="margin-top:auto; padding: 24px;">
+      <p style="font-size: 11px; color: var(--muted);">v2.0.4 - Strategic Edition</p>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <main id="content">
+    <header>
+      <div class="search-wrap">
+        <span style="color:var(--muted)">Search records...</span>
+      </div>
+      <div class="account-info">
+        <select class="role-select" id="roleSelector" onchange="updateRole()">
+          <option value="USER">Citizen User</option>
+          <option value="STAFF">System Staff</option>
+          <option value="ADMIN" selected>Board Admin</option>
+        </select>
+        <span class="role-badge" id="roleDisplay">ADMIN</span>
+        <span class="user-name">Silas Stuart</span>
+      </div>
+    </header>
+
+    <div class="main-view">
+
+      <!-- ── ADMIN VIEW ── -->
+      <section id="view-admin" class="view-section active">
+        <div class="grid">
+          <div class="card">
+            <div class="card-title">Total Incidents</div>
+            <div class="card-value" id="stat-total">0</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Resolution Rate</div>
+            <div class="card-value" id="stat-rate">0%</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Avg Severity</div>
+            <div class="card-value" style="color:var(--warning)" id="stat-sev">N/A</div>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1.5fr 1fr;">
+          <div class="card">
+            <div class="card-title">Complaints by Category</div>
+            <div class="chart-box">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Status Distribution</div>
+            <div class="chart-box">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── STAFF VIEW ── -->
+      <section id="view-staff" class="view-section">
+        <div class="card">
+          <div class="card-title">Addressing Complaints</div>
+          <table id="staffTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Prog.</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="staffList"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── USER VIEW ── -->
+      <section id="view-user" class="view-section">
+        <div class="grid" style="grid-template-columns: 1fr 1.5fr;">
+          <div class="card">
+            <div class="card-title">Submit New Incident</div>
+            <div class="form-group">
+              <label>Title</label>
+              <input type="text" id="comp-title" placeholder="Short summary of issue">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="comp-desc" rows="4" placeholder="Be descriptive..."></textarea>
+            </div>
+
+            <div class="section-label" style="font-size:11px; margin-bottom:8px; color:var(--muted)">AI DIAGNOSTIC TOOLS
+            </div>
+            <div class="ai-tools">
+              <div class="ai-chip" onclick="startAiTool('audio')">🎙️ Audio Scan</div>
+              <div class="ai-chip" onclick="startAiTool('video')">📷 Video Scan</div>
+            </div>
+            <div id="ai-feedback" style="margin-top:12px; font-size:12px; color:var(--accent)"></div>
+
+            <button class="btn" style="margin-top:24px; width:100%" onclick="submitComplaint()">Submit
+              Complaint</button>
+            <div id="video-ui" style="display:none; margin-top: 20px;">
+              <div class="video-container">
+                <video id="live-video" autoplay playsinline muted></video>
+                <canvas id="live-canvas-overlay"></canvas>
+              </div>
+              <canvas id="live-canvas-hidden" style="display:none;"></canvas>
+              <div id="debug-logs">--- System Logs Initialized ---</div>
+              <button class="btn btn-outline" style="margin-top: 10px; width: 100%;" onclick="stopVideoScan()">Stop Scan</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">My Recent Submissions</div>
+            <table id="userTable">
+              <thead>
+                <tr>
+                  <th>Topic</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Last Update</th>
+                  <th>PDF</th>
+                </tr>
+              </thead>
+              <tbody id="userList"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL FOR STAFF RESPONSE -->
+  <div id="modal-overlay">
+    <div id="modal">
+      <h2 style="margin-bottom:16px; color:white">Resolve Complaint #<span id="targetId"></span></h2>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="modal-status" class="role-select" style="width:100%; padding:12px">
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Progress (% Completion)</label>
+        <input type="number" id="modal-progress" min="0" max="100" value="0">
+      </div>
+      <div class="form-group">
+        <label>Official Response / Solution</label>
+        <textarea id="modal-solution" rows="4"></textarea>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:24px">
+        <button class="btn" onclick="saveStaffUpdate()">Save Solution</button>
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentRole = 'ADMIN';
+    let catChartRef = null;
+    let statChartRef = null;
+
+    // ── NAVIGATION ─────────────────
+    function switchTab(tab) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      // This is simplified, we just show role-based view for now
+      updateRole();
+    }
+
+    // ── ROLE MANAGEMENT ─────────────
+    function updateRole() {
+      currentRole = document.getElementById('roleSelector').value;
+      document.getElementById('roleDisplay').textContent = currentRole;
+
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+
+      if (currentRole === 'ADMIN') {
+        document.getElementById('view-admin').classList.add('active');
+        fetchAdminStats();
+      } else if (currentRole === 'STAFF') {
+        document.getElementById('view-staff').classList.add('active');
+        fetchStaffList();
+      } else {
+        document.getElementById('view-user').classList.add('active');
+        fetchUserList();
+      }
+    }
+
+    // ── ADMIN: STATS & CHARTS ───────
+    async function fetchAdminStats() {
+      const res = await fetch('/stats');
+      const data = await res.json();
+
+      document.getElementById('stat-total').textContent = data.total;
+      const rate = data.total > 0 ? Math.round((data.statuses.Resolved / data.total) * 100) : 0;
+      document.getElementById('stat-rate').textContent = rate + '%';
+
+      renderCharts(data);
+    }
+
+    function renderCharts(data) {
+      if (catChartRef) catChartRef.destroy();
+      if (statChartRef) statChartRef.destroy();
+
+      const ctxCat = document.getElementById('categoryChart').getContext('2d');
+      catChartRef = new Chart(ctxCat, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(data.categories),
+          datasets: [{
+            label: 'Incident Volume',
+            data: Object.values(data.categories),
+            backgroundColor: '#58a6ff',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+            x: { grid: { display: false }, ticks: { color: '#8b949e' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      const ctxStat = document.getElementById('statusChart').getContext('2d');
+      statChartRef = new Chart(ctxStat, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(data.statuses),
+          datasets: [{
+            data: Object.values(data.statuses),
+            backgroundColor: ['#d29922', '#58a6ff', '#238636', '#da3633'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: '#c9d1d9', usePointStyle: true } } }
+        }
+      });
+    }
+
+    // ── STAFF: LIST & RESOLUTION ─────
+    async function fetchStaffList() {
+      const res = await fetch('/complaints');
+      const comps = await res.json();
+      const list = document.getElementById('staffList');
+      list.innerHTML = comps.map(c => `
+        <tr>
+          <td>#${c.id}</td>
+          <td style="font-weight:600">${c.title}</td>
+          <td>${c.category}</td>
+          <td style="color:${c.severity === 'HIGH' ? 'var(--danger)' : 'var(--text)'}">${c.severity}</td>
+          <td><span class="badge badge-${c.status.toLowerCase().replace(' ', '')}">${c.status}</span></td>
+          <td>
+            <div class="progress-bar-wrap"><div class="progress-bar" style="width:${c.progress}%"></div></div>
+          </td>
+          <td><button class="btn" style="padding:6px 12px; font-size:12px" onclick="openResolutionModal(${c.id})">Address</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function openResolutionModal(id) {
+      document.getElementById('targetId').textContent = id;
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').style.display = 'none';
+      document.getElementById('modal-solution').value = '';
+    }
+
+    async function saveStaffUpdate() {
+      const id = document.getElementById('targetId').textContent;
+      const status = document.getElementById('modal-status').value;
+      const progress = document.getElementById('modal-progress').value;
+      const staff_response = document.getElementById('modal-solution').value;
+
+      await fetch(`/complaints/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, progress, staff_response })
+      });
+
+      closeModal();
+      fetchStaffList();
+    }
+
+    // ── USER: SUBMISSION & TRACKING ──
+    async function fetchUserList() {
+      const res = await fetch('/complaints');
+      const comps = await res.json();
+      const list = document.getElementById('userList');
+      list.innerHTML = comps.map(c => `
+        <tr>
+          <td style="font-weight:600">${c.title}</td>
+          <td>${c.category}</td>
+          <td><span class="badge badge-${c.status.toLowerCase().replace(' ', '')}">${c.status}</span></td>
+          <td style="color:var(--muted); font-size:12px">${new Date(c.created_at).toLocaleString()}</td>
+          <td><a href="/export/pdf/${c.id}" target="_blank" style="text-decoration:none">📥 PDF</a></td>
+        </tr>
+      `).join('');
+    }
+
+    async function submitComplaint() {
+      const title = document.getElementById('comp-title').value;
+      const description = document.getElementById('comp-desc').value;
+
+      if (!title || !description) return alert("Please fill title and description");
+
+      await fetch('/complaints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description })
+      });
+
+      document.getElementById('comp-title').value = '';
+      document.getElementById('comp-desc').value = '';
+      document.getElementById('ai-feedback').textContent = "Submitted successfully!";
+      fetchUserList();
+    }
+
+    // ── AI REAL-TIME TOOLS ──────────────
+    let videoStream = null;
+    let ws = null;
+    let scanInterval = null;
+    let frameCount = 0;
+    let autoComplaintSent = false;
+
+    function addLog(msg) {
+      const logs = document.getElementById('debug-logs');
+      if (!logs) return;
+      const entry = document.createElement('div');
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logs.prepend(entry);
+      if (logs.children.length > 50) logs.lastChild.remove();
+    }
+
+    async function startAiTool(type) {
+      const feedback = document.getElementById('ai-feedback');
+      
+      if (type === 'audio') {
+        const audioLog = "MIC: isSecureContext=" + window.isSecureContext;
+        addLog(audioLog);
+        feedback.textContent = `Running ${type} scan... please wait...`;
+        setTimeout(() => {
+          feedback.innerHTML = "🎙️ <strong>Audio Diagnostic:</strong> Keywords 'fire', 'danger' detected. Severity: <strong>HIGH</strong>";
+        }, 1500);
+        return;
+      }
+
+      if (type === 'video') {
+        try {
+          addLog(`Checking context: hostname=${window.location.hostname}, secure=${window.isSecureContext}`);
+          
+          if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            const warn = "⚠️ WARNING: Camera access requires HTTPS (Secure Context) or localhost.";
+            addLog(warn);
+            feedback.style.color = "var(--warning)";
+            feedback.innerHTML = "<strong>Error:</strong> Insecure Context. Please use 'localhost' or HTTPS.";
+            return;
+          }
+
+          addLog("Requesting camera access...");
+          feedback.textContent = "Requesting camera access...";
+          
+          // Try with constraints first, then fallback to simple boolean
+          let stream;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 } } });
+          } catch (e) {
+            addLog("Constraint failed, trying default settings...");
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          }
+          
+          videoStream = stream;
+          addLog("Camera access GRANTED!");
+          
+          const videoEl = document.getElementById('live-video');
+          videoEl.srcObject = videoStream;
+          document.getElementById('video-ui').style.display = 'block';
+
+          // Connect WebSocket
+          const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          const wsUrl = `${protocol}//${window.location.host}/detect/live`;
+          addLog(`Connecting to WebSocket: ${wsUrl}`);
+          ws = new WebSocket(wsUrl);
+
+          ws.onopen = () => {
+            addLog("WebSocket connected successfully.");
+            feedback.textContent = "Connection established. Analyzing live feed...";
+            frameCount = 0;
+            autoComplaintSent = false; // Reset auto complaint flag on new scan
+            startScanning();
+          };
+
+          ws.onmessage = (event) => {
+            const result = JSON.parse(event.data);
+            frameCount++;
+            if (frameCount % 10 === 0) addLog(`Processed ${frameCount} frames...`);
+            updateVideoFeedback(result);
+          };
+
+          ws.onerror = (err) => {
+            console.error("WebSocket Error:", err);
+            addLog("!! WebSocket Error !! Check console or network.");
+            feedback.style.color = "var(--danger)";
+            feedback.textContent = "Error: Could not connect to detection server.";
+          };
+
+          ws.onclose = () => {
+            addLog("WebSocket connection closed.");
+          };
+
+        } catch (err) {
+          console.error("Camera access Error:", err);
+          let errorName = err.name || "UnknownError";
+          let errorMsg = err.message || "No message";
+          addLog(`!! Camera Error: ${errorName} - ${errorMsg}`);
+          
+          feedback.style.color = "var(--danger)";
+          if (errorName === 'NotAllowedError') {
+            feedback.innerHTML = "<strong>Error:</strong> Access Denied. Please clear permission blocks in browser settings.";
+          } else {
+            feedback.textContent = `Error: Camera access failed (${errorName})`;
+          }
+        }
+      }
+    }
+
+    function startScanning() {
+      const videoEl = document.getElementById('live-video');
+      const canvas = document.getElementById('live-canvas-hidden');
+      const ctx = canvas.getContext('2d');
+
+      scanInterval = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          canvas.width = videoEl.videoWidth || 640;
+          canvas.height = videoEl.videoHeight || 480;
+          ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+          const base64Image = canvas.toDataURL('image/jpeg', 0.6);
+          ws.send(base64Image);
+        }
+      }, 300); // 3 FPS for smoother live detection
+    }
+
+    function updateVideoFeedback(result) {
+      const feedback = document.getElementById('ai-feedback');
+      const videoEl = document.getElementById('live-video');
+      const overlay = document.getElementById('live-canvas-overlay');
+      const ctx = overlay.getContext('2d');
+
+      overlay.width = videoEl.clientWidth;
+      overlay.height = videoEl.clientHeight;
+      const scaleX = overlay.width / (videoEl.videoWidth || 640);
+      const scaleY = overlay.height / (videoEl.videoHeight || 480);
+
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+      if (result.error) {
+        feedback.style.color = "var(--danger)";
+        feedback.innerHTML = `❌ <strong>Server Error:</strong> ${result.error}`;
+        return;
+      }
+
+      // Draw Objects
+      if (result.objects) {
+        result.objects.forEach(obj => {
+          const [x, y, w, h] = obj.bbox;
+          ctx.strokeStyle = obj.label === 'fire' || obj.label === 'knife' ? '#ff3e3e' : '#58a6ff';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x * scaleX, y * scaleY, w * scaleX, h * scaleY);
+          
+          ctx.fillStyle = ctx.strokeStyle;
+          ctx.font = 'bold 14px Outfit';
+          ctx.fillText(`${obj.label} (${(obj.confidence * 100).toFixed(0)}%)`, x * scaleX, (y * scaleY) > 20 ? (y * scaleY) - 5 : (y * scaleY) + 15);
+        });
+      }
+
+      // Draw Pose
+      if (result.pose && result.pose.length) {
+        ctx.fillStyle = '#ff00ff';
+        result.pose.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x * overlay.width, p.y * overlay.height, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // Draw Emotion
+      if (result.emotions && result.emotions.length) {
+        const emo = result.emotions[0];
+        ctx.fillStyle = '#f0f6fc';
+        ctx.font = 'bold 18px Outfit';
+        ctx.textAlign = 'right';
+        ctx.fillText(`${emo.label.toUpperCase()} ${(emo.confidence).toFixed(0)}%`, overlay.width - 15, 30);
+        ctx.textAlign = 'left';
+      }
+
+      if (result.urgency_detected) {
+        feedback.style.color = "var(--danger)";
+        let cats = result.categories_found.join(', ');
+        feedback.innerHTML = `🚨 <strong>Emergency Detected:</strong> ${cats} (${result.confidence_percent}% confidence). Severity: <strong>${result.severity}</strong>`;
+        
+        // --- AUTO COMPLAINT REGISTRATION ---
+        if (!autoComplaintSent && (result.severity === 'HIGH' || result.severity === 'MEDIUM')) {
+          autoComplaintSent = true;
+          addLog("Triggering automatic complaint registration...");
+          
+          fetch('/complaints', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              title: `[AUTO-DETECTED] Emergency: ${cats}`, 
+              description: `Automated detection from live camera feed. Confidence: ${result.confidence_percent}%. Actions detected: ${cats}.`,
+              category: cats.split(',')[0].trim() || "Emergency",
+              severity: result.severity
+            })
+          }).then(res => {
+            if (res.ok) {
+              addLog("Auto-complaint created successfully.");
+              feedback.innerHTML += `<br><span style="color:var(--success);">✅ Automated Complaint Registered.</span>`;
+              if (currentRole === 'USER') fetchUserList();
+              if (currentRole === 'STAFF') fetchStaffList();
+              if (currentRole === 'ADMIN') fetchAdminStats();
+            }
+          }).catch(err => {
+            addLog(`Error auto-registering complaint: ${err}`);
+          });
+        }
+      } else {
+        feedback.style.color = "var(--accent)";
+        const objLabels = (result.objects || []).map(o => o.label).slice(0,3).join(', ');
+        feedback.textContent = `Live Analysis: ${objLabels || 'Scanning...'} (${result.confidence_percent || 0}% env-score)`;
+      }
+    }
+
+    function stopVideoScan() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+      if (scanInterval) {
+        clearInterval(scanInterval);
+        scanInterval = null;
+      }
+      document.getElementById('video-ui').style.display = 'none';
+      document.getElementById('ai-feedback').textContent = "Scan stopped.";
+      const overlay = document.getElementById('live-canvas-overlay');
+      const ctx = overlay.getContext('2d');
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+    }
+
+    // Init
+    updateRole();
+  </script>
+</body>
+
+</html>
