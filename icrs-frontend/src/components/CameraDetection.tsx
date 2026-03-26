@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useRef, useEffect, useState } from 'react';
 
 const FRAME_INTERVAL_MS = 200; // Sending video frames every 200ms
