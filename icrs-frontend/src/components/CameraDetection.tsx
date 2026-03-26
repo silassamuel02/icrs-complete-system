@@ -48,9 +48,9 @@ const CameraDetection: React.FC<CameraDetectionProps> = ({ width = 640, height =
     // 1. Establish WebSockets connected to FastAPI
     useEffect(() => {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        const host = import.meta.env.VITE_AI_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                      ? 'localhost:8000' 
-                     : window.location.host;
+                     : window.location.host);
         
         const wsUrlVideo = `${protocol}//${host}/detect/live`;
         const wsUrlAudio = `${protocol}//${host}/detect/audio`;
@@ -303,7 +303,8 @@ const CameraDetection: React.FC<CameraDetectionProps> = ({ width = 640, height =
         if (!alertHistory.current[eventName] || (now - alertHistory.current[eventName] > ALERT_COOLDOWN_MS)) {
             alertHistory.current[eventName] = now;
             console.log(`Sending automated emergency to Database: ${eventName}`);
-            fetch('http://localhost:8080/api/complaints/auto-detect', {
+            const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+            fetch(`${apiBase}/complaints/auto-detect`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
